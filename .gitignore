@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+.env
+env/
+venv/
+*.egg-info/
+
+# Django migrations
+**/migrations/
+
+# React
+node_modules/
+build/
+dist/
+*.env
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
