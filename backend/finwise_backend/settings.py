@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'core',
     'portfolio',
     'explorer',
-    'auth',
+    'userauth',
 ]
 
 MIDDLEWARE = [

@@ -22,5 +22,5 @@ urlpatterns = [
     path('api/core/', include('core.urls')),
     path('api/portfolio/', include('portfolio.urls')),
     path('api/explorer/', include('explorer.urls')),
-    path('api/auth/', include('auth.urls')),
+    path('api/userauth/', include('userauth.urls')),
 ]
