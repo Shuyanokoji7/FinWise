@@ -130,3 +130,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Finnhub API Key (replace 'YOUR_API_KEY' with your actual key)
+FINNHUB_API_KEY = 'd1chf6pr01qre5aluup0d1chf6pr01qre5aluupg'
+
+# Google Gemini API Key (replace 'YOUR_GEMINI_API_KEY' with your actual key)
+GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'

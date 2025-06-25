@@ -1,9 +1,13 @@
 from django.urls import path
 from django.http import JsonResponse
+from .views import stock_overview, portfolio_ai_analysis, stock_overview_with_portfolio
 
-def ping(request):
-    return JsonResponse({"status": "ok", "message": "Explorer app is working!"})
+# def ping(request):
+#     return JsonResponse({"status": "ok", "message": "Explorer app is working!"})
 
 urlpatterns = [
-    path('', ping),
+    # path('', ping),
+    path('overview/', stock_overview),
+    path('overview-with-portfolio/', stock_overview_with_portfolio),
+    path('portfolio-analysis/', portfolio_ai_analysis),
 ]
