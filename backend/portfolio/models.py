@@ -78,11 +78,17 @@ class PortfolioHolding(models.Model):
     
     def save(self, *args, **kwargs):
         """Override save to calculate derived fields"""
+        from decimal import Decimal
+        # Ensure all values are Decimals from float conversion
+        shares = float(getattr(self, "shares", 0) or 0)
+        current_price = float(getattr(self, "current_price", 0) or 0)
+        average_price = float(getattr(self, "average_price", 0) or 0)
+        
         # Calculate market value
-        self.market_value = self.shares * self.current_price
+        self.market_value = Decimal(str(shares * current_price))
         
         # Calculate unrealized gain/loss
-        cost_basis = self.shares * self.average_price
+        cost_basis = Decimal(str(shares * average_price))
         self.unrealized_gain_loss = self.market_value - cost_basis
         
         # Calculate unrealized gain/loss percentage

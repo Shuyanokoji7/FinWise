@@ -13,6 +13,7 @@ from pymongo import MongoClient
 import os
 import yfinance as yf
 from .gemini_utils import analyze_stock_data, get_stock_news_insights, get_portfolio_insights
+from portfolio.models import Portfolio
 
 # Create your views here.
 MONGO_URI = "mongodb+srv://bhavya0525:ONlsjphGtmCowWWP@cluster0.kirn0hy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"# Setup MongoDB client
@@ -105,6 +106,10 @@ def stock_overview(request):
     def get_indicators(ticker):
         df = get_candles(ticker)
         close = df['close'].astype(float)
+        # Ensure close is a pandas Series for type safety
+        if not isinstance(close, pd.Series):
+            close = pd.Series(close)
+        
         df['rsi'] = RSIIndicator(close=close, window=14).rsi()
         print(type(close))  # Should print: <class 'pandas.core.series.Series'>
         macd = MACD(close=close)
@@ -279,7 +284,6 @@ def stock_overview_with_portfolio(request):
     portfolio_data = None
     if portfolio_id:
         try:
-            from portfolio.models import Portfolio
             portfolio = Portfolio.objects.get(id=portfolio_id)
             portfolio_data = {
                 'stocks': [],
@@ -338,6 +342,10 @@ def stock_overview_with_portfolio(request):
     def get_indicators(ticker):
         df = get_candles(ticker)
         close = df['close'].astype(float)
+        # Ensure close is a pandas Series for type safety
+        if not isinstance(close, pd.Series):
+            close = pd.Series(close)
+        
         df['rsi'] = RSIIndicator(close=close, window=14).rsi()
         print(type(close))  # Should print: <class 'pandas.core.series.Series'>
         macd = MACD(close=close)
