@@ -1,0 +1,383 @@
+.profile-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px 20px 60px 20px;
+  margin-top: 80px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.profile-pic-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.profile-pic-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+  border: 4px solid #f8f9fa;
+  background: #f8f9fa;
+  cursor: default;
+  transition: box-shadow 0.3s;
+}
+
+.profile-pic-wrapper.editable {
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.25);
+}
+
+.profile-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.profile-pic-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(52, 152, 219, 0.85);
+  color: white;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 0 10px 0;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  opacity: 1;
+  pointer-events: none;
+  transition: background 0.3s;
+}
+
+.profile-pic-wrapper.editable:hover .profile-pic-overlay {
+  background: rgba(46, 204, 113, 0.95);
+}
+
+.pic-uploading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border: 4px solid #ecf0f1;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 2;
+}
+
+.profile-header h1 {
+  color: #2c3e50;
+  margin: 10px 0 2px 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.profile-header p {
+  color: #7f8c8d;
+  margin: 0;
+  font-size: 15px;
+}
+
+.profile-bio {
+  color: #34495e;
+  font-size: 15px;
+  margin: 8px 0 0 0;
+  font-style: italic;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.profile-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-row label {
+  font-weight: 600;
+  color: #34495e;
+  font-size: 14px;
+}
+
+.profile-row input,
+.profile-row textarea {
+  padding: 12px 14px;
+  border: 2px solid #e1e8ed;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #f8f9fa;
+  transition: border-color 0.3s;
+}
+
+.profile-row input:focus,
+.profile-row textarea:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.profile-row textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.edit-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.edit-btn:hover {
+  background: #2980b9;
+}
+
+.save-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.save-btn:hover {
+  background: #229954;
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.cancel-btn:hover {
+  background: #7f8c8d;
+}
+
+.error-message {
+  background: #e74c3c;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.success-message {
+  background: #27ae60;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ecf0f1;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.change-password-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.10);
+}
+
+.change-password-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.18);
+}
+
+.forgot-btn {
+  background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 190, 148, 0.10);
+}
+
+.forgot-btn:hover {
+  background: linear-gradient(135deg, #00cec9 0%, #00b894 100%);
+  box-shadow: 0 4px 16px rgba(0, 190, 148, 0.18);
+}
+
+.send-reset-btn {
+  background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 8px rgba(253, 203, 110, 0.10);
+}
+
+.send-reset-btn:hover {
+  background: linear-gradient(135deg, #e17055 0%, #fdcb6e 100%);
+  box-shadow: 0 4px 16px rgba(253, 203, 110, 0.18);
+}
+
+/* Modal overlay for blur effect */
+.change-password-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background: rgba(44, 62, 80, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.change-password-section {
+  margin-top: 40px;
+  background: #f8f9fa;
+  border-radius: 14px;
+  padding: 32px 22px 22px 22px;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.13);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  min-width: 320px;
+  max-width: 95vw;
+  width: 400px;
+  animation: fadeInCard 0.2s;
+}
+
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translate(-50%, -60%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.change-password-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.close-pw-card-btn {
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 8px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+.close-pw-card-btn:hover {
+  background: #e1e8ed;
+  color: #e74c3c;
+}
+
+@media (max-width: 600px) {
+  .profile-container {
+    padding: 10px 2vw 30px 2vw;
+  }
+  .profile-header h1 {
+    font-size: 22px;
+  }
+  .profile-header p {
+    font-size: 14px;
+  }
+  .profile-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .edit-btn, .save-btn, .cancel-btn, .forgot-btn, .change-password-btn, .send-reset-btn {
+    width: 100%;
+    font-size: 15px;
+    padding: 10px 0;
+  }
+  .profile-pic-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+  .change-password-section {
+    padding: 18px 4vw 10px 4vw;
+    width: 95vw;
+    min-width: unset;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+} 

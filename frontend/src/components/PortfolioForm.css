@@ -1,0 +1,360 @@
+.portfolio-form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.portfolio-form {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.portfolio-form h2 {
+  color: #2c3e50;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.form-section {
+  margin-bottom: 40px;
+  padding: 25px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.form-section h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #34495e;
+  font-size: 15px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.holdings-input {
+  margin-bottom: 20px;
+}
+
+.custom-holdings-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.holdings-form-row-top,
+.holdings-form-row-bottom {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.holdings-form-row-top input,
+.holdings-form-row-bottom input {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 255px;
+  height: 48px;
+  padding: 0 16px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.add-holding-btn {
+  flex: 1 1 22%;
+  min-width: 160px;
+  padding: 10px;
+  font-size: 14px;
+  margin-left: 25px;
+  background-color: #28a745;
+  color: white;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.holdings-form-row-bottom .add-holding-btn {
+  flex: 0 0 200px;
+  min-width: 100px;
+  max-width: 200px;
+  height: 48px;
+  font-size: 16px;
+  padding: 0 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.holdings-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr 1fr 80px;
+  gap: 10px;
+  align-items: end;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e1e8ed;
+}
+
+.holdings-form-row input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.holdings-form-row input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.add-holding-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.add-holding-btn:hover {
+  background: #229954;
+}
+
+.holdings-list {
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e1e8ed;
+  overflow: hidden;
+}
+
+.holdings-header {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr 1fr 80px;
+  gap: 10px;
+  padding: 15px;
+  background: #34495e;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.holding-item {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr 1fr 80px;
+  gap: 10px;
+  padding: 12px 15px;
+  border-bottom: 1px solid #e1e8ed;
+  align-items: center;
+}
+
+.holding-item:last-child {
+  border-bottom: none;
+}
+
+.holding-item:hover {
+  background: #f8f9fa;
+}
+
+.holding-input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: white;
+}
+
+.holding-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.remove-holding-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.remove-holding-btn:hover {
+  background: #c0392b;
+}
+
+.allocation-summary {
+  padding: 15px;
+  background: #ecf0f1;
+  text-align: right;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e8ed;
+}
+
+.save-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.save-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: #7f8c8d;
+}
+
+.error-message {
+  background: #e74c3c;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .portfolio-form-container {
+    padding: 10px;
+  }
+  
+  .portfolio-form {
+    padding: 20px;
+  }
+  
+  .holdings-form-row,
+  .holdings-header,
+  .holding-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .holdings-form-row {
+    padding: 10px;
+  }
+  
+  .holdings-header {
+    display: none;
+  }
+  
+  .holding-item {
+    padding: 10px;
+    border: 1px solid #e1e8ed;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .holdings-form-row-top,
+  .holdings-form-row-bottom {
+    flex-wrap: wrap;
+  }
+  .holdings-form-row-top input,
+  .holdings-form-row-bottom input {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 700px) {
+  .holdings-form-row-top,
+  .holdings-form-row-bottom {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .holdings-form-row-bottom .add-holding-btn {
+    width: 100%;
+    min-width: unset;
+  }
+}

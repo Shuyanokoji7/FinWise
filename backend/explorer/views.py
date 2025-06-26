@@ -10,7 +10,6 @@ from ta.trend import MACD, EMAIndicator
 import time
 import datetime
 from pymongo import MongoClient
-import os
 import yfinance as yf
 from .gemini_utils import analyze_stock_data, get_stock_news_insights, get_portfolio_insights
 from portfolio.models import Portfolio
