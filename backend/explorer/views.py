@@ -11,8 +11,12 @@ import time
 import datetime
 from pymongo import MongoClient
 import yfinance as yf
-from .gemini_utils import analyze_stock_data, get_stock_news_insights, get_portfolio_insights
+from .gemini_utils import analyze_stock_data, get_stock_news_insights, get_portfolio_insights, get_gemini_model
 from portfolio.models import Portfolio
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+import json
 
 # Create your views here.
 MONGO_URI = "mongodb+srv://bhavya0525:ONlsjphGtmCowWWP@cluster0.kirn0hy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"# Setup MongoDB client
@@ -461,3 +465,91 @@ def stock_overview_with_portfolio(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def ai_portfolio_suggestion(request):
+    print("ai_portfolio_suggestion called")
+    print("Request method:", request.method)
+    print("Request headers:", request.headers)
+    print("User:", request.user)
+    print("Request data:", request.data)
+    tickers = request.data.get('tickers', [])
+    total_amount = float(request.data.get('total_amount', 0))
+    risk_level = request.data.get('risk_level', 'Moderate')
+    api_key = settings.FINNHUB_API_KEY
+
+    # 1. Fetch Finnhub data (detailed)
+    stock_data = []
+    for ticker in tickers:
+        # Quote (price)
+        quote_url = f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={api_key}"
+        quote = requests.get(quote_url).json()
+        # Profile (sector, market cap, etc.)
+        profile_url = f"https://finnhub.io/api/v1/stock/profile2?symbol={ticker}&token={api_key}"
+        profile = requests.get(profile_url).json()
+        # Metrics (P/E, beta, dividend yield, etc.)
+        metrics_url = f"https://finnhub.io/api/v1/stock/metric?symbol={ticker}&metric=all&token={api_key}"
+        metrics = requests.get(metrics_url).json().get('metric', {})
+        stock_data.append({
+            "ticker": ticker,
+            "company_name": profile.get("name"),
+            "exchange": profile.get("exchange"),
+            "current_price": quote.get("c"),
+            "sector": profile.get("finnhubIndustry"),
+            "market_cap": profile.get("marketCapitalization"),
+            "beta": metrics.get("beta"),
+            "pe": metrics.get("peInclExtraTTM"),
+            "dividend_yield": metrics.get("dividendYieldIndicatedAnnual"),
+            "1y_return": metrics.get("52WeekPriceReturnDaily"),
+            "volatility": metrics.get("volatility90d"),
+            "pb": metrics.get("pbAnnual"),
+            "roe": metrics.get("roeTTM"),
+            "roa": metrics.get("roaTTM"),
+            "eps": metrics.get("epsInclExtraItemsTTM"),
+            "net_profit_margin": metrics.get("netProfitMarginTTM"),
+            "debt_to_equity": metrics.get("totalDebt/totalEquityAnnual"),
+        })
+
+    # 2. Build prompt for Gemini (detailed)
+    stock_lines = [
+        f"- {s['ticker']} ({s['company_name']}): Price ${s['current_price']}, Exchange {s['exchange']}, Sector {s['sector']}, Market Cap {s['market_cap']}, Beta {s['beta']}, P/E {s['pe']}, Dividend Yield {s['dividend_yield']}, 1Y Return {s['1y_return']}, Volatility {s['volatility']}, PB {s['pb']}, ROE {s['roe']}, ROA {s['roa']}, EPS {s['eps']}, Net Profit Margin {s['net_profit_margin']}, Debt/Equity {s['debt_to_equity']}"
+        for s in stock_data
+    ]
+    prompt = f"""
+    Given these stocks and their real-time data:
+    {chr(10).join(stock_lines)}
+    The user has ${total_amount} to invest and a {risk_level} risk profile.
+    Suggest an optimal allocation (percentages for each stock) to maximize expected return and manage risk, considering diversification, volatility, and fundamentals.
+    Return a JSON object with tickers as keys and percentages as values, and explain your reasoning.
+    """
+
+    # 3. Call Gemini
+    model = get_gemini_model()
+    response = model.generate_content(prompt)
+    response_text = response.text
+
+    # 4. Try to extract JSON allocation from Gemini's response
+    allocation = {}
+    reasoning = ""
+    try:
+        if '```json' in response_text:
+            json_start = response_text.find('```json') + 7
+            json_end = response_text.find('```', json_start)
+            json_content = response_text[json_start:json_end].strip()
+        else:
+            json_start = response_text.find('{')
+            json_end = response_text.find('}', json_start) + 1
+            json_content = response_text[json_start:json_end]
+        allocation = json.loads(json_content)
+        reasoning = response_text.replace(json_content, '').strip()
+    except Exception as e:
+        reasoning = response_text
+        allocation = {}
+
+    return Response({
+        "allocation": allocation,
+        "reasoning": reasoning,
+        "raw_response": response_text,
+        "stock_data": stock_data  # Send all real-time data to frontend
+    })

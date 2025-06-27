@@ -11,6 +11,11 @@ class PortfolioHoldingSerializer(serializers.ModelSerializer):
     average_price = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0'))
     current_price = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0'))
     allocation_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, min_value=Decimal('0'), max_value=Decimal('100'))
+    beta = serializers.DecimalField(max_digits=6, decimal_places=3, required=False, allow_null=True)
+    dividend_yield = serializers.DecimalField(max_digits=6, decimal_places=3, required=False, allow_null=True)
+    one_year_return = serializers.DecimalField(max_digits=8, decimal_places=3, required=False, allow_null=True)
+    volatility = serializers.DecimalField(max_digits=8, decimal_places=3, required=False, allow_null=True)
+    market_cap = serializers.DecimalField(max_digits=20, decimal_places=2, required=False, allow_null=True)
     
     class Meta:
         model = PortfolioHolding
@@ -18,6 +23,7 @@ class PortfolioHoldingSerializer(serializers.ModelSerializer):
             'id', 'ticker', 'company_name', 'sector', 'shares', 'average_price', 
             'current_price', 'allocation_percentage', 'market_value', 
             'unrealized_gain_loss', 'unrealized_gain_loss_percentage', 
+            'beta', 'dividend_yield', 'one_year_return', 'volatility', 'market_cap',
             'added_at', 'updated_at'
         ]
         read_only_fields = ['id', 'market_value', 'unrealized_gain_loss', 'unrealized_gain_loss_percentage', 'added_at', 'updated_at']

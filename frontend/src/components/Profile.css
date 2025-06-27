@@ -1,0 +1,176 @@
+.profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Dimming overlay */
+  backdrop-filter: blur(4px); /* Optional: Adds a nice blur effect to the background */
+  z-index: 50; /* Position it below the navbar but above other page content */
+}
+
+.profile-card {
+  max-width: 600px;
+  position: absolute;
+  top: 110px;  /* Position below the navbar */
+  right: 40px; /* Add some space from the edge */
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); /* Updated shadow for better contrast */
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.profile-pic-wrapper {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.profile-pic {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #4f8cff;
+  box-shadow: 0 2px 12px rgba(79,140,255,0.10);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1;
+  position: relative;
+}
+
+.profile-pic.expanded {
+  width: 200px;
+  height: 200px;
+  border-width: 6px;
+  box-shadow: 0 4px 20px rgba(79,140,255,0.25);
+  transform: scale(1.1);
+}
+
+.profile-pic:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(79,140,255,0.15);
+}
+
+.profile-pic.expanded:hover {
+  transform: scale(1.15);
+}
+
+.profile-pic-wrapper input[type="file"] {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  opacity: 0.8;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-info h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #222;
+}
+
+.profile-info p {
+  margin: 0;
+  color: #555;
+  font-size: 1.2rem;
+}
+
+.profile-input {
+  padding: 0.75rem 1.1rem;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: flex-end;
+}
+
+.edit-btn, .save-btn, .cancel-btn, .forgot-btn {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-btn {
+  background: #4f8cff;
+  color: #fff;
+}
+.save-btn {
+  background: #2ecc71;
+  color: #fff;
+}
+.cancel-btn {
+  background: #e74c3c;
+  color: #fff;
+}
+.forgot-btn {
+  background: #f1c40f;
+  color: #222;
+}
+
+.profile-extra {
+  background: rgba(67, 160, 71, 0.08);
+  border-radius: 12px;
+  padding: 1.3rem;
+}
+
+.profile-extra h3 {
+  margin: 0 0 0.7rem 0;
+  font-size: 1.3rem;
+  color: #388e3c;
+}
+
+.profile-extra ul {
+  list-style: disc inside;
+  margin: 0;
+  padding: 0;
+  color: #388e3c;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    max-width: 98vw;
+    top: 80px;
+    right: 0;
+    padding: 1.5rem;
+  }
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+  .profile-pic-wrapper {
+    margin-bottom: 0.7rem;
+  }
+  .profile-pic.expanded {
+    width: 180px;
+    height: 180px;
+  }
+} 

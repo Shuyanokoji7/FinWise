@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getPortfolios } from '../api/portfolio';
+import { getPortfolios, getPortfolio } from '../api/portfolio';
 import './History.css';
 
 const History = () => {
@@ -25,9 +25,15 @@ const History = () => {
     }
   };
 
-  const handleViewPortfolio = (portfolio) => {
-    // For now, just alert the portfolio name. You can navigate or show modal as needed.
-    alert(`Viewing portfolio: ${portfolio.name}`);
+  const handleViewPortfolio = async (portfolio) => {
+    try {
+      const response = await getPortfolio(portfolio.id);
+      const fullPortfolio = response.data;
+      // For now, just alert the full portfolio details (replace with modal as needed)
+      alert(`Portfolio: ${fullPortfolio.name}\nDescription: ${fullPortfolio.description}\nHoldings: ${fullPortfolio.holdings.map(h => h.ticker).join(', ')}`);
+    } catch (err) {
+      alert('Failed to load portfolio details.');
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -74,8 +80,8 @@ const History = () => {
       ) : (
         <div className="history-portfolios-grid">
           {portfolios.map((portfolio) => {
-            const totalValue = portfolio.holdings?.reduce((total, holding) => total + (holding.market_value || 0), 0) || 0;
-            const totalGainLoss = portfolio.holdings?.reduce((total, holding) => total + (holding.unrealized_gain_loss || 0), 0) || 0;
+            const totalValue = (portfolio.holdings || []).reduce((total, holding) => total + Number(holding.market_value || 0), 0);
+            const totalGainLoss = (portfolio.holdings || []).reduce((total, holding) => total + Number(holding.unrealized_gain_loss || 0), 0);
             const totalGainLossPercentage = totalValue > 0 ? (totalGainLoss / (totalValue - totalGainLoss)) * 100 : 0;
             return (
               <div key={portfolio.id} className="history-portfolio-card">

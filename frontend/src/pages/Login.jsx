@@ -57,6 +57,10 @@ const Login = () => {
         setLoading(true);
         try {
             const response = await login(username, password);
+            // Save the JWT access token to localStorage
+            if (response.data.tokens && response.data.tokens.access) {
+                localStorage.setItem('token', response.data.tokens.access);
+            }
             setSuccess(response.data.message);
             // Save credentials if remember me is checked
             saveCookieData();

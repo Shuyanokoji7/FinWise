@@ -9,9 +9,18 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+from dotenv import load_dotenv
+import os
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Now you can access your variables
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv()
+FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -135,4 +144,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 FINNHUB_API_KEY = 'd1chf6pr01qre5aluup0d1chf6pr01qre5aluupg'
 
 # Google Gemini API Key (replace 'YOUR_GEMINI_API_KEY' with your actual key)
-GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'
+GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
+
+# Django REST Framework JWT Authentication
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# CORS: Explicitly allow Authorization header (optional, but recommended)
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'authorization',
+]

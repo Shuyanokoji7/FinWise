@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './AIPortfolioBuilder.css';
+import { createPortfolio, addHolding } from '../api/portfolio';
+import axios from 'axios';
 
 const AIPortfolioBuilder = ({ onSavePortfolio, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -34,15 +36,45 @@ const AIPortfolioBuilder = ({ onSavePortfolio, onCancel }) => {
     setError('');
 
     try {
-      // Simulate AI API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const tickerList = formData.tickers.split(',').map(t => t.trim().toUpperCase()).filter(t => t);
       const totalAmount = parseFloat(formData.total_amount);
-      
-      // Generate AI suggestions based on risk level and tickers
-      const suggestions = generateSuggestions(tickerList, totalAmount, formData.risk_level);
-      setSuggestions(suggestions);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        'http://localhost:8000/api/explorer/ai-suggest-portfolio/',
+        {
+          tickers: tickerList,
+          total_amount: totalAmount,
+          risk_level: formData.risk_level
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const { allocation, reasoning, stock_data } = response.data;
+      if (!allocation || Object.keys(allocation).length === 0) {
+        setError('AI could not generate a valid allocation. Please try again.');
+        setLoading(false);
+        return;
+      }
+      // Build suggestions object compatible with the rest of the component
+      const allocations = {};
+      tickerList.forEach(ticker => {
+        allocations[ticker] = {
+          allocation_percentage: parseFloat(allocation[ticker] || 0),
+          reasoning: reasoning || ''
+        };
+      });
+      setSuggestions({
+        tickers: tickerList,
+        allocations,
+        total_amount: totalAmount,
+        risk_level: formData.risk_level,
+        stock_data: stock_data || [],
+        summary: {
+          strategy: `${formData.risk_level} risk strategy with AI-powered allocation`,
+          top_holdings: tickerList.map(ticker => `${ticker} (${allocations[ticker].allocation_percentage}%)`).join(', '),
+          diversification: `Portfolio spread across ${tickerList.length} stocks`,
+          risk_notes: reasoning || ''
+        }
+      });
     } catch (err) {
       setError('Failed to generate AI suggestions. Please try again.');
     } finally {
@@ -158,23 +190,46 @@ const AIPortfolioBuilder = ({ onSavePortfolio, onCancel }) => {
 
   const handleAcceptSuggestions = () => {
     if (!suggestions) return;
-
-    const portfolioData = {
+    const totalAmount = suggestions.total_amount;
+    // Prepare a draft portfolio object (no id)
+    const draftPortfolio = {
       name: formData.name || 'AI-Generated Portfolio',
       description: formData.description || suggestions.summary.strategy,
       risk_level: formData.risk_level,
-      holdings: suggestions.tickers.map(ticker => ({
-        ticker,
-        company_name: getCompanyName(ticker),
-        sector: getSector(ticker),
-        allocation_percentage: suggestions.allocations[ticker].allocation_percentage,
-        shares: 0, // Will be calculated based on current price
-        average_price: 0,
-        current_price: getMockPrice(ticker)
-      }))
+      holdings: suggestions.tickers.map(ticker => {
+        // Find real-time data for this ticker
+        const realData = (suggestions.stock_data || []).find(s => s.ticker === ticker) || {};
+        const allocation = suggestions.allocations[ticker].allocation_percentage;
+        const currentPrice = realData.current_price || 0;
+        // Calculate shares and market value
+        const investedAmount = (allocation / 100) * totalAmount;
+        const shares = currentPrice > 0 ? investedAmount / currentPrice : 0;
+        const marketValue = shares * currentPrice;
+        return {
+          ticker,
+          company_name: realData.company_name || getCompanyName(ticker),
+          sector: realData.sector || getSector(ticker),
+          allocation_percentage: allocation,
+          current_price: currentPrice,
+          market_cap: realData.market_cap,
+          pe: realData.pe,
+          dividend_yield: realData.dividend_yield,
+          one_year_return: realData['1y_return'],
+          volatility: realData.volatility,
+          pb: realData.pb,
+          roe: realData.roe,
+          roa: realData.roa,
+          eps: realData.eps,
+          net_profit_margin: realData.net_profit_margin,
+          debt_to_equity: realData.debt_to_equity,
+          shares: shares,
+          average_price: currentPrice, // Assume bought at current price
+          market_value: marketValue,
+          unrealized_gain_loss: 0 // New portfolio, so no gain/loss yet
+        };
+      })
     };
-
-    onSavePortfolio(portfolioData);
+    onSavePortfolio(draftPortfolio);
   };
 
   const getCompanyName = (ticker) => {

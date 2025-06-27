@@ -3,7 +3,7 @@ import PortfolioForm from '../components/PortfolioForm';
 import PortfolioResult from '../components/PortfolioResult';
 import SavedPortfolios from '../components/SavedPortfolios';
 import AIPortfolioBuilder from '../components/AIPortfolioBuilder';
-import { getPortfolio } from '../api/portfolio';
+import { getPortfolio, createPortfolio, addHolding } from '../api/portfolio';
 import './PortfolioBuilder.css';
 
 const PortfolioBuilder = () => {
@@ -50,11 +50,47 @@ const PortfolioBuilder = () => {
     }
   };
 
-  const handleSavePortfolio = (savedPortfolio) => {
-    setSelectedPortfolio(savedPortfolio);
-    setEditingPortfolio(null);
-    setView('result');
-    setRefreshTrigger(prev => prev + 1);
+  const handleSavePortfolio = async (portfolio) => {
+    // If portfolio has no id, it's a draft and needs to be saved to backend
+    if (!portfolio.id) {
+      try {
+        // Ensure total_amount is present and a number
+        let totalAmount = Number(portfolio.total_amount);
+        if (!totalAmount || isNaN(totalAmount)) {
+          totalAmount = 10000; // fallback default
+          alert('Total amount was missing or invalid. Using default value of $10,000.');
+        }
+        const payload = {
+          name: portfolio.name,
+          description: portfolio.description,
+          risk_level: portfolio.risk_level,
+          total_amount: totalAmount,
+          holdings: (portfolio.holdings || []).map(holding => ({
+            ticker: holding.ticker,
+            company_name: holding.company_name,
+            sector: holding.sector,
+            allocation_percentage: Number(holding.allocation_percentage)
+          }))
+        };
+        console.log('Payload to createPortfolio:', payload);
+        // 1. Create the portfolio
+        const response = await createPortfolio(payload);
+        const savedPortfolio = response.data;
+        // 2. No need to add holdings separately, backend handles it
+        setSelectedPortfolio(savedPortfolio);
+        setEditingPortfolio(null);
+        setView('result');
+        setRefreshTrigger(prev => prev + 1);
+      } catch (error) {
+        alert('Failed to save portfolio. Please try again.');
+      }
+    } else {
+      // Already saved, just update state
+      setSelectedPortfolio(portfolio);
+      setEditingPortfolio(null);
+      setView('result');
+      setRefreshTrigger(prev => prev + 1);
+    }
   };
 
   const handleCancelForm = () => {
@@ -116,9 +152,9 @@ const PortfolioBuilder = () => {
                 🤖 AI Portfolio Builder
               </button>
             </div>
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
 
       {/* Content */}
       <div className="portfolio-content">
@@ -150,6 +186,7 @@ const PortfolioBuilder = () => {
             portfolio={selectedPortfolio}
             onEdit={handleEditPortfolio}
             onDelete={handleDeletePortfolio}
+            onSave={handleSavePortfolio}
           />
         )}
       </div>

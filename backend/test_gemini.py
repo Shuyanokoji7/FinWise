@@ -31,7 +31,7 @@ def test_gemini_connection():
         genai.configure(api_key=settings.GEMINI_API_KEY)
         
         # Test with a simple prompt
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content("Hello! Please respond with 'Gemini API is working!' if you can see this message.")
         
         if "Gemini API is working!" in response.text:
@@ -45,6 +45,8 @@ def test_gemini_connection():
             
     except Exception as e:
         print(f"❌ ERROR: Failed to connect to Gemini API: {str(e)}")
+        # for m in genai.list_models():
+            # print(m)
         return False
 
 def test_stock_analysis():

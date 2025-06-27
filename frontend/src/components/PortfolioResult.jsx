@@ -1,30 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './PortfolioResult.css';
 
-const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
+const PortfolioResult = ({ portfolio, onEdit, onDelete, onSave }) => {
   const [expanded, setExpanded] = useState(false);
-
-  if (!portfolio) {
-    return (
-      <div className="portfolio-result-container">
-        <div className="no-portfolio">
-          <h3>No Portfolio Selected</h3>
-          <p>Please create or select a portfolio to view its details.</p>
-        </div>
-      </div>
-    );
-  }
+  const [showReasoning, setShowReasoning] = useState(false);
+  const displayHoldings = portfolio.holdings || [];
 
   const calculateTotalValue = () => {
-    return portfolio.holdings?.reduce((total, holding) => {
-      return total + (holding.market_value || 0);
-    }, 0) || 0;
+    return (displayHoldings || []).reduce((total, holding) => {
+      return total + Number(holding.market_value || 0);
+    }, 0);
   };
 
   const calculateTotalGainLoss = () => {
-    return portfolio.holdings?.reduce((total, holding) => {
-      return total + (holding.unrealized_gain_loss || 0);
-    }, 0) || 0;
+    return (displayHoldings || []).reduce((total, holding) => {
+      return total + Number(holding.unrealized_gain_loss || 0);
+    }, 0);
   };
 
   const calculateTotalGainLossPercentage = () => {
@@ -36,7 +27,7 @@ const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
 
   const getSectorBreakdown = () => {
     const sectors = {};
-    portfolio.holdings?.forEach(holding => {
+    displayHoldings?.forEach(holding => {
       const sector = holding.sector || 'Unknown';
       sectors[sector] = (sectors[sector] || 0) + (holding.allocation_percentage || 0);
     });
@@ -44,7 +35,7 @@ const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
   };
 
   const getTopHoldings = () => {
-    return portfolio.holdings
+    return displayHoldings
       ?.sort((a, b) => (b.allocation_percentage || 0) - (a.allocation_percentage || 0))
       .slice(0, 5) || [];
   };
@@ -57,7 +48,9 @@ const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
   };
 
   const formatPercentage = (value) => {
-    return `${value.toFixed(2)}%`;
+    const num = Number(value);
+    if (isNaN(num)) return '0.00%';
+    return `${num.toFixed(2)}%`;
   };
 
   const getRiskColor = (riskLevel) => {
@@ -74,6 +67,9 @@ const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
   const totalGainLossPercentage = calculateTotalGainLossPercentage();
   const sectorBreakdown = getSectorBreakdown();
   const topHoldings = getTopHoldings();
+
+  // Show Save button only if portfolio is not already saved (e.g., no id)
+  const showSaveButton = onSave && !portfolio.id;
 
   return (
     <div className="portfolio-result-container">
@@ -94,6 +90,11 @@ const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
           <button onClick={() => onDelete(portfolio.id)} className="delete-btn">
             Delete
           </button>
+          {showSaveButton && (
+            <button onClick={() => onSave(portfolio)} className="save-btn">
+              Save Portfolio
+            </button>
+          )}
         </div>
       </div>
 
@@ -194,22 +195,32 @@ const PortfolioResult = ({ portfolio, onEdit, onDelete }) => {
                 <span>Avg Price</span>
                 <span>Current Price</span>
                 <span>Market Value</span>
-                <span>Allocation</span>
+                <span>Allocation %</span>
                 <span>Gain/Loss</span>
+                <span>Market Cap</span>
+                <span>P/E Ratio</span>
+                <span>Beta</span>
+                <span>Dividend Yield</span>
+                <span>1Y Return</span>
+                <span>Volatility</span>
               </div>
-              {portfolio.holdings?.map((holding, index) => (
+              {(displayHoldings || []).map((holding, index) => (
                 <div key={holding.id || index} className="table-row">
-                  <span className="ticker">{holding.ticker}</span>
-                  <span className="company">{holding.company_name}</span>
-                  <span className="sector">{holding.sector}</span>
-                  <span className="shares">{holding.shares?.toFixed(4)}</span>
-                  <span className="avg-price">{formatCurrency(holding.average_price || 0)}</span>
-                  <span className="current-price">{formatCurrency(holding.current_price || 0)}</span>
-                  <span className="market-value">{formatCurrency(holding.market_value || 0)}</span>
-                  <span className="allocation">{formatPercentage(holding.allocation_percentage || 0)}</span>
-                  <span className={`gain-loss ${(holding.unrealized_gain_loss || 0) >= 0 ? 'positive' : 'negative'}`}>
-                    {formatCurrency(holding.unrealized_gain_loss || 0)}
-                  </span>
+                  <span className="ticker">{holding.ticker || '-'}</span>
+                  <span className="company">{holding.company_name || '-'}</span>
+                  <span className="sector">{holding.sector || '-'}</span>
+                  <span className="shares">{holding.shares !== undefined ? Number(holding.shares).toFixed(4) : '-'}</span>
+                  <span className="avg-price">{holding.average_price !== undefined ? `$${Number(holding.average_price).toFixed(2)}` : '-'}</span>
+                  <span className="current-price">{holding.current_price !== undefined ? `$${Number(holding.current_price).toFixed(2)}` : '-'}</span>
+                  <span className="market-value">{holding.market_value !== undefined ? `$${Number(holding.market_value).toFixed(2)}` : '-'}</span>
+                  <span className="allocation">{holding.allocation_percentage !== undefined ? `${Number(holding.allocation_percentage).toFixed(2)}%` : '-'}</span>
+                  <span className="gain-loss">{holding.unrealized_gain_loss !== undefined ? `$${Number(holding.unrealized_gain_loss).toFixed(2)}` : '-'}</span>
+                  <span className="market-cap">{holding.market_cap !== undefined ? `$${Number(holding.market_cap).toLocaleString()}` : '-'}</span>
+                  <span className="pe">{'pe' in holding ? holding.pe : '-'}</span>
+                  <span className="beta">{holding.beta !== undefined ? Number(holding.beta).toFixed(3) : '-'}</span>
+                  <span className="dividend-yield">{holding.dividend_yield !== undefined ? `${Number(holding.dividend_yield).toFixed(2)}%` : '-'}</span>
+                  <span className="one-year-return">{holding.one_year_return !== undefined ? `${Number(holding.one_year_return).toFixed(2)}%` : '-'}</span>
+                  <span className="volatility">{holding.volatility !== undefined ? `${Number(holding.volatility).toFixed(2)}%` : '-'}</span>
                 </div>
               ))}
             </div>

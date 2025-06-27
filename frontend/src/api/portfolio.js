@@ -23,41 +23,29 @@ const simulateApiCall = (data, delay = 500) => {
 
 // Portfolio Management
 export const getPortfolios = () => {
-    // Use mock data for testing
-    return simulateApiCall(mockPortfolios);
-    
-    // Uncomment when backend is ready:
-    // return axios.get(API_URL + 'portfolios/', { headers: getAuthHeaders() });
+    return axios.get(API_URL, { headers: getAuthHeaders() });
 };
 
 export const getPortfolio = (portfolioId) => {
-    // Use mock data for testing
-    const portfolio = mockPortfolios.find(p => p.id === parseInt(portfolioId));
-    if (!portfolio) {
-        return Promise.reject(new Error('Portfolio not found'));
-    }
-    return simulateApiCall(portfolio);
-    
-    // Uncomment when backend is ready:
-    // return axios.get(API_URL + `portfolios/${portfolioId}/`, { headers: getAuthHeaders() });
+    return axios.get(API_URL + `${portfolioId}/`, { headers: getAuthHeaders() });
 };
 
 export const createPortfolio = (portfolioData) => {
     // Use mock data for testing
-    const newPortfolio = {
-        id: Date.now(),
-        ...portfolioData,
-        total_value: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_active: true,
-        holdings: []
-    };
-    mockPortfolios.push(newPortfolio);
-    return simulateApiCall(newPortfolio);
+    // const newPortfolio = {
+    //     id: Date.now(),
+    //     ...portfolioData,
+    //     total_value: 0,
+    //     created_at: new Date().toISOString(),
+    //     updated_at: new Date().toISOString(),
+    //     is_active: true,
+    //     holdings: []
+    // };
+    // mockPortfolios.push(newPortfolio);
+    // return simulateApiCall(newPortfolio);
     
-    // Uncomment when backend is ready:
-    // return axios.post(API_URL + 'portfolios/', portfolioData, { headers: getAuthHeaders() });
+    // Use real backend API
+    return axios.post(API_URL, portfolioData, { headers: getAuthHeaders() });
 };
 
 export const updatePortfolio = (portfolioId, portfolioData) => {
@@ -108,27 +96,24 @@ export const getPortfolioHoldings = (portfolioId) => {
 
 export const addHolding = (portfolioId, holdingData) => {
     // Use mock data for testing
-    const portfolio = mockPortfolios.find(p => p.id === parseInt(portfolioId));
-    if (!portfolio) {
-        return Promise.reject(new Error('Portfolio not found'));
-    }
+    // const portfolio = mockPortfolios.find(p => p.id === parseInt(portfolioId));
+    // if (!portfolio) {
+    //     return Promise.reject(new Error('Portfolio not found'));
+    // }
+    // const newHolding = {
+    //     id: Date.now(),
+    //     ...holdingData,
+    //     added_at: new Date().toISOString(),
+    //     updated_at: new Date().toISOString()
+    // };
+    // if (!portfolio.holdings) {
+    //     portfolio.holdings = [];
+    // }
+    // portfolio.holdings.push(newHolding);
+    // return simulateApiCall(newHolding);
     
-    const newHolding = {
-        id: Date.now(),
-        ...holdingData,
-        added_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-    };
-    
-    if (!portfolio.holdings) {
-        portfolio.holdings = [];
-    }
-    portfolio.holdings.push(newHolding);
-    
-    return simulateApiCall(newHolding);
-    
-    // Uncomment when backend is ready:
-    // return axios.post(API_URL + `portfolios/${portfolioId}/holdings/`, holdingData, { headers: getAuthHeaders() });
+    // Use real backend API
+    return axios.post(API_URL + `${portfolioId}/holdings/`, holdingData, { headers: getAuthHeaders() });
 };
 
 export const updateHolding = (portfolioId, holdingId, holdingData) => {

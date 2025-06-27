@@ -16,6 +16,8 @@ from .serializers import (
 )
 import json
 from decimal import Decimal
+import requests
+from django.conf import settings
 
 # Portfolio Management Views
 
@@ -32,6 +34,65 @@ def portfolio_list(request):
         serializer = PortfolioCreateSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             portfolio = serializer.save()
+            # Save holdings with real-time data
+            holdings_data = request.data.get('holdings', [])
+            finnhub_key = getattr(settings, 'FINNHUB_API_KEY', None)
+            for holding in holdings_data:
+                ticker = holding.get('ticker')
+                allocation = float(holding.get('allocation_percentage', 0))
+                total_amount = float(request.data.get('total_amount', 0))
+                invested_amount = (allocation / 100) * total_amount if total_amount else 0
+                # Fetch real-time price and metrics
+                current_price = float(holding.get('current_price', 0))
+                beta = None
+                dividend_yield = None
+                one_year_return = None
+                volatility = None
+                market_cap = None
+                if finnhub_key and ticker:
+                    # Quote endpoint for price
+                    url = f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={finnhub_key}"
+                    try:
+                        resp = requests.get(url, timeout=5)
+                        current_price = float(resp.json().get('c', current_price))
+                    except Exception:
+                        pass
+                    # Metrics endpoint for other fields
+                    metrics_url = f"https://finnhub.io/api/v1/stock/metric?symbol={ticker}&metric=all&token={finnhub_key}"
+                    try:
+                        metrics_resp = requests.get(metrics_url, timeout=5)
+                        metrics = metrics_resp.json().get('metric', {})
+                        beta = metrics.get('beta')
+                        dividend_yield = metrics.get('dividendYieldTTM')
+                        one_year_return = metrics.get('52WeekHigh') and metrics.get('52WeekLow') and ((current_price - float(metrics.get('52WeekLow', 0))) / float(metrics.get('52WeekLow', 1)) * 100) or None
+                        volatility = metrics.get('volatility90d')
+                        market_cap = metrics.get('marketCapitalization')
+                    except Exception:
+                        pass
+                shares = invested_amount / current_price if current_price > 0 else 0
+                market_value = shares * current_price
+                average_price = current_price
+                # Save holding
+                PortfolioHolding.objects.create(
+                    portfolio=portfolio,
+                    ticker=ticker,
+                    company_name=holding.get('company_name', ''),
+                    sector=holding.get('sector', ''),
+                    shares=shares,
+                    average_price=average_price,
+                    current_price=current_price,
+                    allocation_percentage=allocation,
+                    market_value=market_value,
+                    unrealized_gain_loss=0,
+                    beta=beta,
+                    dividend_yield=dividend_yield,
+                    one_year_return=one_year_return,
+                    volatility=volatility,
+                    market_cap=market_cap
+                )
+            # Update portfolio total value
+            portfolio.total_value = sum(h.market_value for h in portfolio.holdings.all())
+            portfolio.save()
             return Response(PortfolioSerializer(portfolio).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,6 +103,21 @@ def portfolio_detail(request, portfolio_id):
     portfolio = get_object_or_404(Portfolio, id=portfolio_id, user=request.user)
     
     if request.method == 'GET':
+        finnhub_key = getattr(settings, 'FINNHUB_API_KEY', None)
+        # Update and save each holding with the latest price
+        for holding in portfolio.holdings.all():
+            ticker = holding.ticker
+            shares = float(holding.shares)
+            price = float(holding.current_price)
+            if finnhub_key and ticker and shares > 0:
+                url = f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={finnhub_key}"
+                try:
+                    resp = requests.get(url, timeout=5)
+                    price = float(resp.json().get('c', price))
+                except Exception:
+                    pass
+            holding.update_current_price(price)  # This will recalculate and save all values
+        # Now re-serialize to get updated values
         serializer = PortfolioSerializer(portfolio)
         return Response(serializer.data)
     

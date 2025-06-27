@@ -8,7 +8,7 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 def get_gemini_model():
     """Get the Gemini Pro model for text generation"""
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         return model
     except Exception as e:
         print(f"Error initializing Gemini model: {e}")

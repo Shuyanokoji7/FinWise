@@ -66,6 +66,11 @@ class PortfolioHolding(models.Model):
     market_value = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
     unrealized_gain_loss = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
     unrealized_gain_loss_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
+    beta = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    dividend_yield = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    one_year_return = models.DecimalField(max_digits=8, decimal_places=3, null=True, blank=True)
+    volatility = models.DecimalField(max_digits=8, decimal_places=3, null=True, blank=True)
+    market_cap = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     added_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
