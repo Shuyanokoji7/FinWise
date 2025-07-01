@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../api/userauth';
+import { registerRequest, verifyRegistrationOtp } from '../api/userauth';
 import './Register.css';
 import axios from 'axios'; // <-- Add this import
 
 const Register = () => {
-    const [step, setStep] = useState('start'); // 'start', 'otp', 'register'
+    const [step, setStep] = useState('start'); // 'start', 'otp', 'done'
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
@@ -19,9 +19,10 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    // Step 1: Registration request (send OTP)
+    const handleRegisterRequest = async (e) => {
         e.preventDefault();
-        if (username === '' || email === '' || password === '' || confirmPassword === '') {
+        if (username === '' || email === '') {
             setError('Please fill in all fields');
             return;
         }
@@ -29,33 +30,15 @@ const Register = () => {
             setError('Please enter a valid email address');
             return;
         }
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
         setError('');
         setLoading(true);
-
         try {
-            const response = await register(username, email, password);
-            setSuccess(response.data.message);
-
-            // Send OTP after registration
-            await axios.post('http://localhost:8000/api/userauth/send-otp/', { email });
-            setStep('verify');
-            setSuccess('Registration successful! Please check your email for the OTP.');
+            await registerRequest(username, email);
+            setSuccess('OTP sent! Please check your email.');
+            setStep('otp');
         } catch (err) {
-            if (err.response && err.response.data) {
-                const errorData = err.response.data;
-                if (errorData.username) {
-                    setError(`Username: ${errorData.username[0]}`);
-                } else if (errorData.email) {
-                    setError(`Email: ${errorData.email[0]}`);
-                } else if (errorData.password) {
-                    setError(`Password: ${errorData.password[0]}`);
-                } else {
-                    setError('An unknown error occurred.');
-                }
+            if (err.response && err.response.data && err.response.data.error) {
+                setError(err.response.data.error);
             } else {
                 setError('Registration failed. Please try again.');
             }
@@ -64,61 +47,34 @@ const Register = () => {
         }
     };
 
-    // OTP verification handler
+    // Step 2: OTP verification and password set
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
         setOtpError('');
         setOtpLoading(true);
-        try {
-            await axios.post('http://localhost:8000/api/userauth/verify-otp/', { email, otp });
-            setStep('register');
-            setSuccess('OTP verified! Now set your password.');
-        } catch (err) {
-            setOtpError('Invalid OTP. Please try again.');
-        } finally {
-            setOtpLoading(false);
-        }
-    };
-
-    const handleSendOtp = async (e) => {
-        e.preventDefault();
-        setError('');
-        if (!username || !email) {
-            setError('Please enter username and email');
-            return;
-        }
-        setOtpLoading(true);
-        try {
-            await axios.post('http://localhost:8000/api/userauth/send-otp/', { email });
-            setStep('otp');
-            setSuccess('OTP sent! Please check your email.');
-        } catch (err) {
-            setError('Failed to send OTP. Try again.');
-        } finally {
-            setOtpLoading(false);
-        }
-    };
-
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setError('');
         if (!password || !confirmPassword) {
-            setError('Please enter and confirm your password');
+            setOtpError('Please enter and confirm your password');
+            setOtpLoading(false);
             return;
         }
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setOtpError('Passwords do not match');
+            setOtpLoading(false);
             return;
         }
-        setLoading(true);
         try {
-            await register(username, email, password);
-            setSuccess('Registration successful! You can now log in.');
+            await verifyRegistrationOtp(email, otp, password, confirmPassword);
+            setSuccess('Registration complete! You can now log in.');
+            setStep('done');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            setError('Registration failed. Try again.');
+            if (err.response && err.response.data && err.response.data.error) {
+                setOtpError(err.response.data.error);
+            } else {
+                setOtpError('Invalid OTP or registration failed. Please try again.');
+            }
         } finally {
-            setLoading(false);
+            setOtpLoading(false);
         }
     };
 
@@ -143,8 +99,8 @@ const Register = () => {
                     <div className="register-form-container">
                         {step === 'start' && (
                             <>
-                                <h2>Start Registration</h2>
-                                <form onSubmit={handleSendOtp}>
+                                <h2>Register</h2>
+                                <form onSubmit={handleRegisterRequest}>
                                     <div className="input-group">
                                         <FaUser className="input-icon" />
                                         <input
@@ -167,8 +123,8 @@ const Register = () => {
                                     </div>
                                     {error && <p className="error-message">{error}</p>}
                                     {success && <p className="success-message">{success}</p>}
-                                    <button type="submit" className="register-btn" disabled={otpLoading}>
-                                        {otpLoading ? 'Sending OTP...' : 'Send OTP'}
+                                    <button type="submit" className="register-btn" disabled={loading}>
+                                        {loading ? 'Sending OTP...' : 'Send OTP'}
                                     </button>
                                 </form>
                             </>
@@ -176,7 +132,7 @@ const Register = () => {
 
                         {step === 'otp' && (
                             <>
-                                <h2>Verify OTP</h2>
+                                <h2>Verify OTP & Set Password</h2>
                                 <form onSubmit={handleVerifyOtp}>
                                     <div className="input-group">
                                         <input
@@ -187,19 +143,6 @@ const Register = () => {
                                             required
                                         />
                                     </div>
-                                    {otpError && <p className="error-message">{otpError}</p>}
-                                    {success && <p className="success-message">{success}</p>}
-                                    <button type="submit" className="register-btn" disabled={otpLoading}>
-                                        {otpLoading ? 'Verifying...' : 'Verify OTP'}
-                                    </button>
-                                </form>
-                            </>
-                        )}
-
-                        {step === 'register' && (
-                            <>
-                                <h2>Set Password</h2>
-                                <form onSubmit={handleRegister}>
                                     <div className="input-group">
                                         <FaLock className="input-icon" />
                                         <input
@@ -220,17 +163,21 @@ const Register = () => {
                                             required
                                         />
                                     </div>
-                                    {error && <p className="error-message">{error}</p>}
+                                    {otpError && <p className="error-message">{otpError}</p>}
                                     {success && <p className="success-message">{success}</p>}
-                                    <button type="submit" className="register-btn" disabled={loading}>
-                                        {loading ? 'Registering...' : 'Register'}
+                                    <button type="submit" className="register-btn" disabled={otpLoading}>
+                                        {otpLoading ? 'Verifying...' : 'Register'}
                                     </button>
                                 </form>
                             </>
                         )}
-                        <div className="login-link">
-                            <p>Already have an account? <a href="/login">Login here</a></p>
-                        </div>
+
+                        {step === 'done' && (
+                            <>
+                                <h2>Registration Complete!</h2>
+                                <p className="success-message">You can now log in.</p>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

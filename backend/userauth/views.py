@@ -16,9 +16,10 @@ from .serializers import (
     SendOTPSerializer,
     VerifyOTPSerializer
 )
-from .models import OTPVerification
+from .models import OTPVerification, PendingRegistration
 import random
 from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password
 
 
 class RegisterView(APIView):
@@ -107,23 +108,82 @@ def check_auth(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+def register_request(request):
+    email = request.data.get('email')
+    username = request.data.get('username')
+    if not all([email, username]):
+        return Response({'error': 'Email and username are required.'}, status=400)
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already registered.'}, status=400)
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already taken.'}, status=400)
+    otp = str(random.randint(100000, 999999))
+    PendingRegistration.objects.update_or_create(
+        email=email,
+        defaults={
+            'username': username,
+            'otp': otp,
+            'is_verified': False
+        }
+    )
+    send_mail(
+        subject='Your FinWise Registration OTP',
+        message=f'Your OTP code is: {otp}',
+        from_email='no-reply@finwise.com',
+        recipient_list=[email],
+        fail_silently=False,
+    )
+    return Response({'message': 'OTP sent to email.'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def verify_registration_otp(request):
+    email = request.data.get('email')
+    otp = request.data.get('otp')
+    password = request.data.get('password')
+    confirm_password = request.data.get('confirmPassword')
+    if not all([email, otp, password, confirm_password]):
+        return Response({'error': 'All fields are required.'}, status=400)
+    if password != confirm_password:
+        return Response({'error': 'Passwords do not match.'}, status=400)
+    try:
+        pending = PendingRegistration.objects.get(email=email)
+    except PendingRegistration.DoesNotExist:
+        return Response({'error': 'No pending registration for this email.'}, status=404)
+    if pending.otp != otp:
+        return Response({'error': 'Invalid OTP.'}, status=400)
+    user = User.objects.create_user(
+        username=pending.username,
+        email=pending.email,
+        password=password
+    )
+    pending.delete()
+    return Response({'message': 'Registration complete. You can now log in.'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
 def send_otp(request):
     serializer = SendOTPSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
         otp = str(random.randint(100000, 999999))
-        user, created = User.objects.get_or_create(username=email, email=email)
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'User with this email does not exist.'}, status=404)
         OTPVerification.objects.update_or_create(user=user, defaults={'otp': otp, 'is_verified': False})
-        # Send OTP via email
         send_mail(
             subject='Your FinWise OTP Verification Code',
             message=f'Your OTP code is: {otp}',
-            from_email='no-reply@finwise.com',  # Change to your sender email
+            from_email='no-reply@finwise.com',
             recipient_list=[email],
             fail_silently=False,
         )
         return Response({'message': 'OTP sent.'})
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
@@ -144,6 +204,7 @@ def verify_otp(request):
         except (User.DoesNotExist, OTPVerification.DoesNotExist):
             return Response({'error': 'User or OTP not found.'}, status=404)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
@@ -167,6 +228,7 @@ def forgot_password_send_otp(request):
     # IMPORTANT: Return the resolved email!
     return Response({'message': 'OTP sent for password reset.', 'email': email})
 
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def forgot_password_verify_otp(request):
@@ -187,6 +249,7 @@ def forgot_password_verify_otp(request):
             return Response({'error': 'User or OTP not found.'}, status=404)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def reset_password(request):
@@ -206,6 +269,7 @@ def reset_password(request):
         return Response({'message': 'Password reset successful.'})
     except (User.DoesNotExist, OTPVerification.DoesNotExist):
         return Response({'error': 'User or OTP not found.'}, status=404)
+
 
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])

@@ -53,3 +53,9 @@ export const changePassword = ({ oldPassword, newPassword }) =>
 
 export const forgotPassword = (email) =>
   axios.post(`${API_URL}forgot-password/`, { email });
+
+export const registerRequest = (username, email) =>
+  axios.post(API_URL + 'register-request/', { username, email });
+
+export const verifyRegistrationOtp = (email, otp, password, confirmPassword) =>
+  axios.post(API_URL + 'verify-registration-otp/', { email, otp, password, confirmPassword });

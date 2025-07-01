@@ -5,7 +5,9 @@ from .views import (
     LogoutView,
     UserProfileView,
     PasswordChangeView,
-    check_auth
+    check_auth,
+    register_request,
+    verify_registration_otp
 )
 from . import views
 
@@ -21,4 +23,6 @@ urlpatterns = [
     path('forgot-password/send-otp/', views.forgot_password_send_otp, name='forgot_password_send_otp'),
     path('forgot-password/verify-otp/', views.forgot_password_verify_otp, name='forgot_password_verify_otp'),
     path('forgot-password/reset/', views.reset_password, name='reset_password'),
+    path('register-request/', register_request, name='register_request'),
+    path('verify-registration-otp/', verify_registration_otp, name='verify_registration_otp'),
 ]

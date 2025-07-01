@@ -198,7 +198,7 @@ const Profile = () => {
           </div>
           <div className="profile-row">
             <label>Joined</label>
-            <input type="text" value={new Date(user.joined).toLocaleDateString()} disabled />
+            <input type="text" value={formData && formData.date_joined ? new Date(formData.date_joined).toLocaleDateString() : ''} disabled />
           </div>
           <div className="profile-actions">
             {!editMode ? (
