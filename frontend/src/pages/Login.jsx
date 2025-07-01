@@ -3,6 +3,7 @@ import { FaUser, FaLock } from 'react-icons/fa';
 import { login } from '../api/userauth';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -11,6 +12,7 @@ const Login = () => {
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [showForgotModal, setShowForgotModal] = useState(false);
     const navigate = useNavigate();
 
     const saveCookieData = () => {
@@ -59,7 +61,7 @@ const Login = () => {
             const response = await login(username, password);
             // Save the JWT access token to localStorage
             if (response.data.tokens && response.data.tokens.access) {
-                localStorage.setItem('token', response.data.tokens.access);
+                localStorage.setItem('accessToken', response.data.tokens.access);
             }
             setSuccess(response.data.message);
             // Save credentials if remember me is checked
@@ -137,7 +139,13 @@ const Login = () => {
                                         onChange={handleRememberMeChange}
                                     /> Remember me For 1 Month
                                 </label>
-                                <a href="/forgot-password">Forgot password?</a>
+                                <button
+                                    className="forgot-password-link"
+                                    type="button"
+                                    onClick={() => setShowForgotModal(true)}
+                                >
+                                    Forgot Password?
+                                </button>
                             </div>
                             {error && <p className="error-message">{error}</p>}
                             {success && <p className="success-message">{success}</p>}
@@ -151,6 +159,10 @@ const Login = () => {
                     </div>
                 </div>
             </div>
+            <ForgotPasswordModal
+                isOpen={showForgotModal}
+                onClose={() => setShowForgotModal(false)}
+            />
         </div>
     );
 };

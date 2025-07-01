@@ -1,21 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import './HorizontalNavbar.css';
-import logo from '../logo.svg'; // Importing the logo from the src folder
+import logo from '../logo.svg';
 import Profile from './Profile';
 
 const HorizontalNavbar = () => {
   const [isProfileVisible, setIsProfileVisible] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
-  // This is an example user. In a real app, this would come from your state management or an API call.
-  const user = {
-    username: 'JohnDoe',
-    profilePic: 'https://randomuser.me/api/portraits/men/75.jpg',
-    // To test the fallback, set profilePic to null:
-    // profilePic: null
-  };
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    setIsLoggedIn(!!token);
+
+    if (token) {
+      try {
+        // Decode JWT payload
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUser({
+          username: payload.username || payload.user_name || payload.sub || '',
+        });
+      } catch (e) {
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
+  }, []);
 
   const toggleProfileVisibility = () => {
     setIsProfileVisible(!isProfileVisible);
@@ -25,7 +38,6 @@ const HorizontalNavbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const profilePic = user?.profilePic;
   const username = user?.username;
 
   const getInitials = (name) => {
@@ -47,18 +59,16 @@ const HorizontalNavbar = () => {
           <span>FinWise</span>
         </Link>
 
-        {/* Profile Icon */}
-        <div className="navbar-profile" onClick={toggleProfileVisibility}>
-          {profilePic ? (
-            <img src={profilePic} alt="Profile" className="profile-icon-img" />
-          ) : (
+        {/* Profile Icon - only show if logged in */}
+        {isLoggedIn && user && (
+          <div className="navbar-profile" onClick={toggleProfileVisibility}>
             <div className="profile-icon-initials">
               {getInitials(username)}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </nav>
-      {isProfileVisible && (
+      {isProfileVisible && isLoggedIn && user && (
         <div className="profile-overlay" onClick={toggleProfileVisibility}>
           <div onClick={(e) => e.stopPropagation()}>
             <Profile />
@@ -69,4 +79,4 @@ const HorizontalNavbar = () => {
   );
 };
 
-export default HorizontalNavbar; 
+export default HorizontalNavbar;

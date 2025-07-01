@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Profile.css';
-import ForgotPasswordModal from './ForgotPasswordModal';
+import { changePassword } from '../api/userauth';
+import axios from 'axios';
 
 const initialProfile = {
   username: 'johndoe',
@@ -22,6 +23,13 @@ const Profile = () => {
   const [picPreview, setPicPreview] = useState(profile.profilePic);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [picExpanded, setPicExpanded] = useState(false);
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,8 +69,38 @@ const Profile = () => {
     setEditMode(false);
   };
 
-  const handleForgotPassword = () => {
-    setShowForgotPassword(true);
+  const handleForgotPassword = async () => {
+    try {
+      await axios.post('http://localhost:8000/api/userauth/forgot-password/send-otp/', {
+        email_or_username: profile.email,
+      });
+      setShowForgotPassword(true); // Open modal after OTP is sent
+    } catch (error) {
+      alert('Failed to send OTP. Please try again.');
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess('');
+    if (newPassword !== confirmPassword) {
+      setPwError('Passwords do not match.');
+      return;
+    }
+    setPwLoading(true);
+    try {
+      await changePassword({ oldPassword, newPassword });
+      setPwSuccess('Password changed successfully!');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowChangePw(false);
+    } catch (err) {
+      setPwError('Failed to change password. Check your old password.');
+    } finally {
+      setPwLoading(false);
+    }
   };
 
   return (
@@ -123,7 +161,6 @@ const Profile = () => {
           ) : (
             <>
               <button className="edit-btn" onClick={handleEdit}>Edit Profile</button>
-              <button className="forgot-btn" onClick={handleForgotPassword}>Forgot Password?</button>
             </>
           )}
         </div>
@@ -137,12 +174,53 @@ const Profile = () => {
         </div>
       </div>
       
-      <ForgotPasswordModal 
-        isOpen={showForgotPassword}
-        onClose={() => setShowForgotPassword(false)}
-      />
+      <div className="change-password-container">
+        {!showForgotPassword && (
+          <>
+            <button onClick={() => setShowChangePw(true)} className="change-password-btn">
+              Change Password
+            </button>
+            {showChangePw && (
+              <form onSubmit={handleChangePassword} className="change-password-form">
+                <input
+                  type="password"
+                  placeholder="Old Password"
+                  value={oldPassword}
+                  onChange={e => setOldPassword(e.target.value)}
+                  required
+                  className="password-input"
+                />
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  required
+                  className="password-input"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                  className="password-input"
+                />
+                {pwError && <p className="error-message">{pwError}</p>}
+                {pwSuccess && <p className="success-message">{pwSuccess}</p>}
+                <button type="submit" disabled={pwLoading} className="submit-btn">
+                  {pwLoading ? 'Changing...' : 'Change Password'}
+                </button>
+                <button type="button" onClick={() => setShowChangePw(false)} className="cancel-btn">
+                  Cancel
+                </button>
+              </form>
+            )}
+          </>
+        )}
+      </div>
     </>
   );
 };
 
-export default Profile; 
+export default Profile;

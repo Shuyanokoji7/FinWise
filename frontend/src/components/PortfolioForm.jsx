@@ -7,6 +7,7 @@ const PortfolioForm = ({ portfolio = null, onSave, onCancel }) => {
     name: portfolio?.name || '',
     description: portfolio?.description || '',
     risk_level: portfolio?.risk_level || 'Moderate',
+    total_amount: portfolio?.total_amount || 10000, // <-- This line is important
   });
 
   const [holdings, setHoldings] = useState(portfolio?.holdings || []);
@@ -122,7 +123,11 @@ const PortfolioForm = ({ portfolio = null, onSave, onCancel }) => {
         }
       }
 
-      onSave(savedPortfolio);
+      onSave({
+        ...formData,
+        total_amount: Number(formData.total_amount),
+        holdings,
+      });
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred while saving the portfolio');
     } finally {
@@ -177,6 +182,21 @@ const PortfolioForm = ({ portfolio = null, onSave, onCancel }) => {
                 <option key={level} value={level}>{level}</option>
               ))}
             </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="total_amount">Total Amount ($)</label>
+            <input
+              type="number"
+              id="total_amount"
+              name="total_amount"
+              value={formData.total_amount}
+              onChange={handleInputChange}
+              required
+              min="1"
+              step="0.01"
+              placeholder="Enter total investment amount"
+            />
           </div>
         </div>
 

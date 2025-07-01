@@ -291,7 +291,7 @@
   box-shadow: 0 4px 16px rgba(253, 203, 110, 0.18);
 }
 
-/* Modal overlay for blur effect */
+/* Change Password Overlay */
 .change-password-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -303,11 +303,11 @@
   -webkit-backdrop-filter: blur(8px);
 }
 
+/* Change Password Card */
 .change-password-section {
-  margin-top: 40px;
-  background: #f8f9fa;
-  border-radius: 14px;
-  padding: 32px 22px 22px 22px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 28px 24px 28px;
   box-shadow: 0 8px 32px rgba(52, 152, 219, 0.13);
   position: fixed;
   left: 50%;
@@ -329,7 +329,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 18px;
+}
+
+.change-password-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
 }
 
 .close-pw-card-btn {
@@ -347,6 +354,65 @@
 .close-pw-card-btn:hover {
   background: #e1e8ed;
   color: #e74c3c;
+}
+
+.change-password-form .profile-row {
+  margin-bottom: 18px;
+}
+
+.change-password-form label {
+  font-weight: 600;
+  color: #34495e;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.change-password-form input[type="password"],
+.change-password-form input[type="text"] {
+  padding: 12px 14px;
+  border: 2px solid #e1e8ed;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #f8f9fa;
+  transition: border-color 0.3s;
+  width: 100%;
+}
+
+.change-password-form input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.change-password-form .show-password-label {
+  font-size: 14px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.change-password-form .save-btn {
+  background: #2471a3;
+  color: #fff;
+  border: none;
+  padding: 14px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 18px;
+  width: 100%;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.change-password-form .save-btn:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+}
+
+.change-password-form .save-btn:hover:not(:disabled) {
+  background: #1866a3;
 }
 
 @media (max-width: 600px) {
@@ -380,4 +446,4 @@
     top: 50%;
     transform: translate(-50%, -50%);
   }
-} 
+}

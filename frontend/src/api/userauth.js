@@ -2,6 +2,10 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api/userauth/';
 
+const getAuthHeaders = () => ({
+  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+});
+
 export const register = (username, email, password) => {
     return axios.post(API_URL + 'register/', {
         username,
@@ -17,55 +21,35 @@ export const login = (username, password) => {
     });
 };
 
-// Mock user profile for frontend testing
-const mockUser = {
-    id: 1,
-    username: 'johndoe',
-    email: 'johndoe@example.com',
-    first_name: 'John',
-    last_name: 'Doe',
-    bio: 'Investor. Tech enthusiast. Coffee lover.',
-    joined: '2023-01-15T10:30:00Z',
-    profile_pic: 'https://randomuser.me/api/portraits/men/32.jpg',
-};
+export const getUserProfile = () =>
+  axios.get(`${API_URL}profile/`, getAuthHeaders());
 
-export const getUserProfile = () => {
-    return new Promise((resolve) => {
-        setTimeout(() => resolve({ data: mockUser }), 500);
-    });
-};
+export const updateUserProfile = (data) => {
+  const formData = new FormData();
+  if (data.first_name !== undefined) formData.append('first_name', data.first_name);
+  if (data.last_name !== undefined) formData.append('last_name', data.last_name);
+  if (data.bio !== undefined) formData.append('bio', data.bio);
+  if (data.profile_pic instanceof File) formData.append('profile_pic', data.profile_pic);
 
-export const updateUserProfile = (profileData) => {
-    Object.assign(mockUser, profileData);
-    return new Promise((resolve) => {
-        setTimeout(() => resolve({ data: mockUser }), 500);
-    });
+  return axios.put('/api/userauth/profile/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
 };
 
 export const uploadProfilePic = (file) => {
-    // Simulate upload and return a new random image
-    mockUser.profile_pic = 'https://randomuser.me/api/portraits/men/' + (Math.floor(Math.random() * 99) + 1) + '.jpg';
-    return new Promise((resolve) => {
-        setTimeout(() => resolve({ data: { profile_pic: mockUser.profile_pic } }), 1000);
-    });
+  const formData = new FormData();
+  formData.append('profile_pic', file);
+  return axios.post(`${API_URL}profile/pic/`, formData, {
+    ...getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders().headers,
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };
 
-export const changePassword = ({ oldPassword, newPassword }) => {
-    // Simulate password change
-    if (oldPassword === 'wrong') {
-        return Promise.reject({ response: { data: { message: 'Incorrect current password.' } } });
-    }
-    return new Promise((resolve) => {
-        setTimeout(() => resolve({ data: { message: 'Password changed successfully.' } }), 1000);
-    });
-};
+export const changePassword = ({ oldPassword, newPassword }) =>
+  axios.post(`${API_URL}change-password/`, { old_password: oldPassword, new_password: newPassword }, getAuthHeaders());
 
-export const forgotPassword = (email) => {
-    // Simulate forgot password
-    if (email !== mockUser.email) {
-        return Promise.reject({ response: { data: { message: 'Email not found.' } } });
-    }
-    return new Promise((resolve) => {
-        setTimeout(() => resolve({ data: { message: 'Password reset link sent to your email.' } }), 1000);
-    });
-};
+export const forgotPassword = (email) =>
+  axios.post(`${API_URL}forgot-password/`, { email });

@@ -246,24 +246,8 @@ const Profile = () => {
             </div>
             <div className="profile-actions">
               <button type="submit" className="save-btn" disabled={pwLoading}>{pwLoading ? 'Changing...' : 'Change Password'}</button>
-              <button type="button" className="forgot-btn" onClick={() => setShowForgot(v => !v)}>
-                {showForgot ? 'Hide Forgot Password' : 'Forgot Password?'}
-              </button>
             </div>
           </form>
-          {showForgot && (
-            <form className="forgot-password-form" onSubmit={handleForgotPassword}>
-              <div className="profile-row">
-                <label>Email</label>
-                <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required />
-              </div>
-              {forgotError && <div className="error-message">{forgotError}</div>}
-              {forgotSuccess && <div className="success-message">{forgotSuccess}</div>}
-              <div className="profile-actions">
-                <button type="submit" className="send-reset-btn" disabled={forgotLoading}>{forgotLoading ? 'Sending...' : 'Send Reset Link'}</button>
-              </div>
-            </form>
-          )}
         </div>
       )}
     </>

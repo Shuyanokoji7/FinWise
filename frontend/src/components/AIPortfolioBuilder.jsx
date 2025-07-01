@@ -193,9 +193,10 @@ const AIPortfolioBuilder = ({ onSavePortfolio, onCancel }) => {
     const totalAmount = suggestions.total_amount;
     // Prepare a draft portfolio object (no id)
     const draftPortfolio = {
-      name: formData.name || 'AI-Generated Portfolio',
+      name: formData.name || `AI-Generated Portfolio ${Date.now()}`, // Make name unique
       description: formData.description || suggestions.summary.strategy,
       risk_level: formData.risk_level,
+      total_amount: totalAmount, // <-- ADD THIS LINE
       holdings: suggestions.tickers.map(ticker => {
         // Find real-time data for this ticker
         const realData = (suggestions.stock_data || []).find(s => s.ticker === ticker) || {};
@@ -447,4 +448,4 @@ const AIPortfolioBuilder = ({ onSavePortfolio, onCancel }) => {
   );
 };
 
-export default AIPortfolioBuilder; 
+export default AIPortfolioBuilder;

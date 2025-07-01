@@ -161,3 +161,11 @@ from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'authorization',
 ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'chaudharidivyesh7384@gmail.com'         # Your email
+EMAIL_HOST_PASSWORD = 'akbmxukbcmwboefg'        # App password, not your Gmail password!
+DEFAULT_FROM_EMAIL = 'FinWise <chaudharidivyesh7384@gmail.com>'

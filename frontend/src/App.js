@@ -7,6 +7,7 @@ import PortfolioBuilder from './pages/PortfolioBuilder';
 import Explorer from './pages/Explorer';
 import History from './pages/History';
 import Navbar from './components/Navbar';
+import HorizontalNavbar from './components/HorizontalNavbar';
 import './App.css';
 
 function AppContent() {
@@ -33,6 +34,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <HorizontalNavbar />
       <AppContent />
     </Router>
   );
